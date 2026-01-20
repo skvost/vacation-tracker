@@ -6,8 +6,26 @@ export type ExpenseCategory =
   | 'transport'
   | 'other';
 
+export interface Household {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface HouseholdMember {
+  id: string;
+  household_id: string;
+  user_id: string | null;
+  role: 'owner' | 'member';
+  invited_email: string | null;
+  invite_token: string;
+  status: 'pending' | 'active';
+  created_at: string;
+}
+
 export interface Trip {
   id: string;
+  household_id: string;
   name: string;
   destination: string;
   start_date: string;
@@ -50,6 +68,7 @@ export interface TripFormData {
   start_date: string;
   end_date: string;
   notes?: string;
+  household_id: string;
 }
 
 export interface ExpenseFormData {

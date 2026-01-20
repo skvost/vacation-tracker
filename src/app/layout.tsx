@@ -27,26 +27,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 min-h-screen`}
       >
-        <header className="bg-white border-b">
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <nav className="flex items-center justify-between">
-              <a href="/" className="text-xl font-semibold text-gray-900">
-                Vacation Tracker
-              </a>
-              <div className="flex gap-4">
-                <a href="/" className="text-gray-600 hover:text-gray-900">
-                  Trips
-                </a>
-                <a href="/calendar" className="text-gray-600 hover:text-gray-900">
-                  Calendar
-                </a>
-              </div>
-            </nav>
-          </div>
-        </header>
-        <main className="max-w-6xl mx-auto px-4 py-8">
-          {children}
-        </main>
+        {children}
       </body>
     </html>
   );

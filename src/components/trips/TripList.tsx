@@ -6,35 +6,42 @@ import { Button } from '@/components/ui/button';
 import { TripCard } from './TripCard';
 import { TripForm } from './TripForm';
 import { getTrips, createTrip } from '@/lib/api';
+import { getUserHousehold } from '@/lib/household';
 import type { Trip, TripFormData } from '@/lib/types';
 
 export function TripList() {
   const router = useRouter();
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [householdId, setHouseholdId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    loadTrips();
+    loadData();
   }, []);
 
-  const loadTrips = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
+      const { household } = await getUserHousehold();
+      if (household) {
+        setHouseholdId(household.id);
+      }
       const data = await getTrips();
       setTrips(data);
     } catch (err) {
-      setError('Failed to load trips. Make sure Supabase is configured.');
+      setError('Failed to load trips.');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateTrip = async (data: TripFormData) => {
-    const newTrip = await createTrip(data);
+  const handleCreateTrip = async (data: Omit<TripFormData, 'household_id'>) => {
+    if (!householdId) return;
+    const newTrip = await createTrip({ ...data, household_id: householdId });
     setTrips((prev) => [...prev, newTrip]);
     setShowForm(false);
   };
@@ -51,10 +58,7 @@ export function TripList() {
     return (
       <div className="text-center py-12">
         <p className="text-red-500 mb-4">{error}</p>
-        <p className="text-sm text-gray-500 mb-4">
-          Create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file with your Supabase credentials.
-        </p>
-        <Button onClick={loadTrips}>Retry</Button>
+        <Button onClick={loadData}>Retry</Button>
       </div>
     );
   }

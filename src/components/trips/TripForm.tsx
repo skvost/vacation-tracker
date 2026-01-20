@@ -21,7 +21,7 @@ interface TripFormProps {
   trip?: Trip;
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: TripFormData) => Promise<void>;
+  onSubmit: (data: Omit<TripFormData, 'household_id'>) => Promise<void>;
 }
 
 export function TripForm({ trip, open, onClose, onSubmit }: TripFormProps) {
