@@ -4,6 +4,8 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { format, differenceInDays } from 'date-fns';
 import { getTrip, updateTrip, deleteTrip } from '@/lib/api';
+import { getHouseholdMembers } from '@/lib/household';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -23,7 +25,12 @@ import {
 } from '@/components/ui/dialog';
 import { TripForm } from '@/components/trips/TripForm';
 import { ExpenseList } from '@/components/expenses/ExpenseList';
-import type { TripWithDetails, TripFormData } from '@/lib/types';
+import type { TripWithDetails, TripFormData, HouseholdMember } from '@/lib/types';
+
+interface Member {
+  id: string;
+  label: string;
+}
 
 export default function TripDetailPage({
   params,
@@ -33,6 +40,8 @@ export default function TripDetailPage({
   const { id } = use(params);
   const router = useRouter();
   const [trip, setTrip] = useState<TripWithDetails | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -47,6 +56,23 @@ export default function TripDetailPage({
     try {
       setLoading(true);
       setError(null);
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+
+      // Get household members
+      const householdMembers = await getHouseholdMembers();
+      const memberList: Member[] = householdMembers
+        .filter((m) => m.status === 'active' && m.user_id)
+        .map((m) => ({
+          id: m.user_id!,
+          label: m.user_id === user?.id ? 'Me' : 'Partner',
+        }));
+      setMembers(memberList);
+
       const data = await getTrip(id);
       if (!data) {
         setError('Trip not found');
@@ -162,6 +188,8 @@ export default function TripDetailPage({
           <ExpenseList
             tripId={trip.id}
             expenses={trip.expenses}
+            members={members}
+            currentUserId={currentUserId}
             onUpdate={loadTrip}
           />
         </CardContent>

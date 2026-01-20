@@ -16,13 +16,20 @@ import { createExpense, updateExpense, deleteExpense } from '@/lib/api';
 import type { Expense, ExpenseFormData } from '@/lib/types';
 import { EXPENSE_CATEGORIES } from '@/lib/types';
 
+interface Member {
+  id: string;
+  label: string;
+}
+
 interface ExpenseListProps {
   tripId: string;
   expenses: Expense[];
+  members: Member[];
+  currentUserId?: string;
   onUpdate: () => void;
 }
 
-export function ExpenseList({ tripId, expenses, onUpdate }: ExpenseListProps) {
+export function ExpenseList({ tripId, expenses, members, currentUserId, onUpdate }: ExpenseListProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
@@ -30,6 +37,11 @@ export function ExpenseList({ tripId, expenses, onUpdate }: ExpenseListProps) {
 
   const getCategoryMeta = (category: string) => {
     return EXPENSE_CATEGORIES.find((c) => c.value === category) ?? { emoji: '', label: category };
+  };
+
+  const getMemberLabel = (userId: string | null) => {
+    if (!userId) return null;
+    return members.find((m) => m.id === userId)?.label ?? 'Unknown';
   };
 
   async function handleCreate(data: ExpenseFormData) {
@@ -106,6 +118,7 @@ export function ExpenseList({ tripId, expenses, onUpdate }: ExpenseListProps) {
               <div className="space-y-2">
                 {expensesByDate[dateKey].map((expense) => {
                   const meta = getCategoryMeta(expense.category);
+                  const paidByLabel = getMemberLabel(expense.paid_by);
                   return (
                     <div
                       key={expense.id}
@@ -117,7 +130,10 @@ export function ExpenseList({ tripId, expenses, onUpdate }: ExpenseListProps) {
                           <p className="font-medium">
                             {expense.description || meta.label}
                           </p>
-                          <p className="text-xs text-gray-500">{meta.label}</p>
+                          <p className="text-xs text-gray-500">
+                            {meta.label}
+                            {paidByLabel && <span> · Paid by {paidByLabel}</span>}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -154,6 +170,8 @@ export function ExpenseList({ tripId, expenses, onUpdate }: ExpenseListProps) {
       {/* Add Form */}
       <ExpenseForm
         open={showForm}
+        members={members}
+        currentUserId={currentUserId}
         onClose={() => setShowForm(false)}
         onSubmit={handleCreate}
       />
@@ -162,6 +180,8 @@ export function ExpenseList({ tripId, expenses, onUpdate }: ExpenseListProps) {
       {editingExpense && (
         <ExpenseForm
           expense={editingExpense}
+          members={members}
+          currentUserId={currentUserId}
           open={true}
           onClose={() => setEditingExpense(null)}
           onSubmit={handleUpdate}

@@ -21,17 +21,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Expense, ExpenseFormData, ExpenseCategory } from '@/lib/types';
+import type { Expense, ExpenseFormData, ExpenseCategory, HouseholdMember } from '@/lib/types';
 import { EXPENSE_CATEGORIES, CURRENCIES } from '@/lib/types';
+
+interface Member {
+  id: string;
+  label: string;
+}
 
 interface ExpenseFormProps {
   expense?: Expense;
+  members: Member[];
+  currentUserId?: string;
   open: boolean;
   onClose: () => void;
   onSubmit: (data: ExpenseFormData) => Promise<void>;
 }
 
-export function ExpenseForm({ expense, open, onClose, onSubmit }: ExpenseFormProps) {
+export function ExpenseForm({ expense, members, currentUserId, open, onClose, onSubmit }: ExpenseFormProps) {
   const [amount, setAmount] = useState(expense?.amount?.toString() ?? '');
   const [currency, setCurrency] = useState(expense?.currency ?? 'EUR');
   const [category, setCategory] = useState<ExpenseCategory>(expense?.category ?? 'other');
@@ -39,6 +46,7 @@ export function ExpenseForm({ expense, open, onClose, onSubmit }: ExpenseFormPro
   const [date, setDate] = useState<Date | undefined>(
     expense?.date ? new Date(expense.date) : new Date()
   );
+  const [paidBy, setPaidBy] = useState(expense?.paid_by ?? currentUserId ?? '');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +61,7 @@ export function ExpenseForm({ expense, open, onClose, onSubmit }: ExpenseFormPro
         category,
         description: description || undefined,
         date: format(date, 'yyyy-MM-dd'),
+        paid_by: paidBy || undefined,
       });
       onClose();
     } finally {
@@ -148,6 +157,24 @@ export function ExpenseForm({ expense, open, onClose, onSubmit }: ExpenseFormPro
               </PopoverContent>
             </Popover>
           </div>
+
+          {members.length > 0 && (
+            <div className="space-y-2">
+              <Label>Paid by</Label>
+              <Select value={paidBy} onValueChange={setPaidBy}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select who paid" />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.map((member) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

@@ -43,6 +43,7 @@ export interface Expense {
   category: ExpenseCategory;
   description: string | null;
   date: string;
+  paid_by: string | null;
   created_at: string;
 }
 
@@ -77,6 +78,7 @@ export interface ExpenseFormData {
   category: ExpenseCategory;
   description?: string;
   date: string;
+  paid_by?: string;
 }
 
 export interface ChecklistFormData {
