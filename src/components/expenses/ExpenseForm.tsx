@@ -21,8 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Expense, ExpenseFormData, ExpenseCategory, HouseholdMember } from '@/lib/types';
-import { EXPENSE_CATEGORIES, CURRENCIES } from '@/lib/types';
+import type { Expense, ExpenseFormData, ExpenseCategory } from '@/lib/types';
+import { EXPENSE_CATEGORIES } from '@/lib/types';
 
 interface Member {
   id: string;
@@ -40,7 +40,6 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ expense, members, currentUserId, open, onClose, onSubmit }: ExpenseFormProps) {
   const [amount, setAmount] = useState(expense?.amount?.toString() ?? '');
-  const [currency, setCurrency] = useState(expense?.currency ?? 'EUR');
   const [category, setCategory] = useState<ExpenseCategory>(expense?.category ?? 'other');
   const [description, setDescription] = useState(expense?.description ?? '');
   const [date, setDate] = useState<Date | undefined>(
@@ -57,7 +56,7 @@ export function ExpenseForm({ expense, members, currentUserId, open, onClose, on
     try {
       await onSubmit({
         amount: parseFloat(amount),
-        currency,
+        currency: 'CZK',
         category,
         description: description || undefined,
         date: format(date, 'yyyy-MM-dd'),
@@ -80,35 +79,18 @@ export function ExpenseForm({ expense, members, currentUserId, open, onClose, on
           <DialogTitle>{expense ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
-              <Select value={currency} onValueChange={setCurrency}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="amount">Amount (CZK)</Label>
+            <Input
+              id="amount"
+              type="number"
+              step="1"
+              min="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0"
+              required
+            />
           </div>
 
           <div className="space-y-2">

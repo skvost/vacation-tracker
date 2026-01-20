@@ -69,7 +69,6 @@ export function ExpenseList({ tripId, expenses, members, currentUserId, onUpdate
   }
 
   const totalAmount = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
-  const primaryCurrency = expenses[0]?.currency || 'EUR';
 
   // Group expenses by date
   const expensesByDate = expenses.reduce(
@@ -95,7 +94,7 @@ export function ExpenseList({ tripId, expenses, members, currentUserId, onUpdate
           <h3 className="text-lg font-semibold">Expenses</h3>
           <p className="text-sm text-gray-500">
             {expenses.length} {expenses.length === 1 ? 'expense' : 'expenses'}
-            {expenses.length > 0 && ` · Total: ${totalAmount.toLocaleString()} ${primaryCurrency}`}
+            {expenses.length > 0 && ` · Total: ${totalAmount.toLocaleString()} CZK`}
           </p>
         </div>
         <Button onClick={() => setShowForm(true)}>Add Expense</Button>
@@ -138,7 +137,7 @@ export function ExpenseList({ tripId, expenses, members, currentUserId, onUpdate
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="font-semibold">
-                          {Number(expense.amount).toLocaleString()} {expense.currency}
+                          {Number(expense.amount).toLocaleString()} CZK
                         </span>
                         <div className="flex gap-1">
                           <Button
